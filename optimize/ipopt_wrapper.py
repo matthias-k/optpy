@@ -99,6 +99,15 @@ def replace_option(options, oldname, newname):
 
 def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=None,
                    bounds=None, constraints=(), tol=None, callback=None, options=None):
+    """
+    Minimize a function using ipopt. The call signature is exactly like for
+    `scipy.optimize.mimize`. In options, all options are directly passed to
+    ipopt. Check [http://www.coin-or.org/Ipopt/documentation/node39.html] for
+    details.
+
+    The options `disp` and `maxiter` are automatically mapped to their
+    ipopt-equivalents `print_level` and `max_iter`.
+    """
 
     _x0 = np.atleast_1d(x0)
     problem = IpoptProblemWrapper(fun, args=args, jac=jac, hess=hess,

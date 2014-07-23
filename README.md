@@ -38,6 +38,22 @@ the optimimzation or keep them constant. `optimize` provides an easy way to do s
 Here we have a function of three variables `x1`, `x2`, `x3`, but we want to optimize
 only `x1` and `x2`.
 
+    def f(x1, x2, x3):
+        return np.sum(x1**2)+np.sum(x2**2)
+
+    def constraint(x1, x2, x3):
+        return x1-1.0
+
+    constraints = [{'type': 'eq', 'fun': constraint}]
+
+    res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
+                                method='SLSQP', constraints = constraints)
+    np.testing.assert_allclose(res.x1, 1.0)
+    np.testing.assert_allclose(res.x2, [0.0, 0.0])
+    np.testing.assert_allclose(res.x3, 1.0)
+
+There is also a more explicit interface:
+
     parameter_manager = optimize.ParameterManager(['x1', 'x2', 'x3'], ['x1', 'x2'],
                                                    x1=1.0, x2=np.array([2.0, 2.0]), x3=1.0)
 

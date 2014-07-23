@@ -10,7 +10,7 @@ from __future__ import absolute_import
 import numpy as np
 import scipy.optimize
 
-from .jacobian import FunctionWithApproxJacobian, FunctionWithApproxJacobianCentral
+from .jacobian import FunctionWithApproxJacobian
 
 
 class ParameterManager(object):
@@ -69,15 +69,40 @@ class ParameterManager(object):
             return shape[0]
 
 
-def wrap_parameter_manager(f, parameter_manager):
-    def new_f(x, *args, **kwargs):
-        params = parameter_manager.extract_parameters(x, return_list = True)
-        params.extend(args)
-        return f(*params, **kwargs)
-    return new_f
+class KeywordParameterManager(ParameterManager):
+    def __init__(self, initial_dict, optimize):
+        """ Create a parameter manager
+            :param initial_dict: Dictionary of initial values
+            :type initial_dict: dict
+            :param optimize: The parameters that should be optimized. Has to be a subset of inital_dict.keys()
+            :type optimize: list of strings
+        """
+        parameters = sorted(initial_dict.keys())
+        super(KeywordParameterManager, self).__init__(parameters, optimize, **initial_dict)
 
 
-def minimize(f, parameter_manager, args=(), method='BFGS',
+def wrap_parameter_manager(f, parameter_manager, additional_kwargs=None):
+    if isinstance(parameter_manager, KeywordParameterManager):
+        def new_f(x, *args, **kwargs):
+            if args:
+                raise ValueError('KeywordParameterManager can only be used with keyword! Try giving all arguments as keywords.')
+            params = parameter_manager.extract_parameters(x, return_list = False)
+            kwargs.update(params)
+            if additional_kwargs:
+                kwargs.update(additional_kwargs)
+            return f(**kwargs)
+        return new_f
+    else:
+        def new_f(x, *args, **kwargs):
+            params = parameter_manager.extract_parameters(x, return_list = True)
+            params.extend(args)
+            if additional_kwargs:
+                kwargs.update(additional_kwargs)
+            return f(*params, **kwargs)
+        return new_f
+
+
+def minimize(f, parameter_manager_or_x0, optimize=None, args=(), kwargs=None, method='BFGS',
              jac=None,
              bounds=None,
              constraints=(),
@@ -89,7 +114,17 @@ def minimize(f, parameter_manager, args=(), method='BFGS',
        and initial values from the parameter_manager.
 
        Remark: Notice that at least SLSQP does not support None values in the bounds"""
-    wrapped_f = wrap_parameter_manager(f, parameter_manager)
+
+    if isinstance(parameter_manager_or_x0, ParameterManager):
+        parameter_manager = parameter_manager_or_x0
+        if optimize is not None:
+            parameter_manager.optimize = optimize
+    else:
+        parameter_manager = KeywordParameterManager(parameter_manager_or_x0, optimize)
+        if args:
+            raise ValueError('Keyword based parameters can only be used with kwargs, not with args! Try giving all additional arguments as keywords.')
+
+    wrapped_f = wrap_parameter_manager(f, parameter_manager, kwargs)
     x0 = parameter_manager.build_vector()
     if callable(jac):
         def jac_with_keyword(*args, **kwargs):
