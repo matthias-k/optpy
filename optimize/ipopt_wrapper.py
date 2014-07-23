@@ -1,7 +1,12 @@
 from __future__ import absolute_import
 
 import numpy as np
-from scipy.optimize import OptimizeResult
+try:
+    from scipy.optimize import OptimizeResult
+except ImportError:
+    # in scipy 0.14 Result was renamed to OptimzeResult
+    from scipy.optimize import Result
+    OptimizeResult = Result
 
 import ipopt
 from .jacobian import FunctionWithApproxJacobian
