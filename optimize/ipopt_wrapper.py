@@ -86,8 +86,8 @@ def get_constraint_bounds(constraints, x0):
     return cl, cu
 
 
-def minimize(fun, x0, args=(), method=None, jac=None, hess=None, hessp=None,
-             bounds=None, constraints=(), tol=None, callback=None, options=None):
+def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=None,
+                   bounds=None, constraints=(), tol=None, callback=None, options=None):
 
     _x0 = np.atleast_1d(x0)
     problem = IpoptProblemWrapper(fun, args=args, jac=jac, hess=hess,

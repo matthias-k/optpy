@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import optimization.ipopt_wrapper as ipopt
+import optimize.ipopt_wrapper as ipopt
 
 
 class TestWrapper(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestWrapper(unittest.TestCase):
 class TestMinimize(unittest.TestCase):
     def test_fun1d(self):
         fun = lambda x: x**2
-        res = ipopt.minimize(fun, 1000)
+        res = ipopt.minimize_ipopt(fun, 1000)
         self.assertIsInstance(res.x, float)
         np.testing.assert_allclose(res.x, 0, atol=1e-8)
         self.assertTrue(res.success)
@@ -52,7 +52,7 @@ class TestMinimize(unittest.TestCase):
 
     def test_fun2d(self):
         fun = lambda x: np.sum(np.square(x))
-        res = ipopt.minimize(fun, [1000, 1], tol=1e-9)
+        res = ipopt.minimize_ipopt(fun, [1000, 1], tol=1e-9)
         self.assertIsInstance(res.x, np.ndarray)
         np.testing.assert_allclose(res.x, [0, 0], atol=1e-8)
         self.assertTrue(res.success)
@@ -63,7 +63,7 @@ class TestMinimize(unittest.TestCase):
         fun = lambda x: x**2
         constraints = {'fun': lambda x: x-1,
                        'type': 'ineq'}
-        res = ipopt.minimize(fun, 1000, constraints=constraints, tol=1e-9)
+        res = ipopt.minimize_ipopt(fun, 1000, constraints=constraints, tol=1e-9)
         self.assertIsInstance(res.x, float)
         np.testing.assert_allclose(res.x, 1, atol=1e-8)
         self.assertTrue(res.success)
@@ -74,7 +74,7 @@ class TestMinimize(unittest.TestCase):
         fun = lambda x: np.sum(np.square(x))
         constraints = {'fun': lambda x: x[0]-1,
                        'type': 'ineq'}
-        res = ipopt.minimize(fun, [1000, 10], constraints=constraints, tol=1e-9)
+        res = ipopt.minimize_ipopt(fun, [1000, 10], constraints=constraints, tol=1e-9)
         self.assertIsInstance(res.x, np.ndarray)
         np.testing.assert_allclose(res.x, [1, 0], atol=1e-8)
         self.assertTrue(res.success)
@@ -85,7 +85,7 @@ class TestMinimize(unittest.TestCase):
         fun = lambda x: np.sum(np.square(x))
         constraints = {'fun': lambda x: np.array([x[0]-1, x[1]-2]),
                        'type': 'ineq'}
-        res = ipopt.minimize(fun, [1000, 10], constraints=constraints, tol=1e-9, options={'disp': 0})
+        res = ipopt.minimize_ipopt(fun, [1000, 10], constraints=constraints, tol=1e-9, options={'disp': 0})
         self.assertIsInstance(res.x, np.ndarray)
         np.testing.assert_allclose(res.x, [1, 2], atol=1e-8)
         self.assertTrue(res.success)
