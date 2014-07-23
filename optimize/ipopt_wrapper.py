@@ -91,6 +91,12 @@ def get_constraint_bounds(constraints, x0, INF=1e19):
     return cl, cu
 
 
+def replace_option(options, oldname, newname):
+    if oldname in options:
+        if newname not in options:
+            options[newname] = options.pop(oldname)
+
+
 def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=None,
                    bounds=None, constraints=(), tol=None, callback=None, options=None):
 
@@ -113,9 +119,11 @@ def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=Non
                         ub=ub,
                         cl=cl,
                         cu=cu)
-    if 'disp' in options:
-        options['print_level'] = options.pop('disp')
-    elif 'print_level' not in options:
+
+    # Rename some default scipy options
+    replace_option(options, 'disp', 'print_level')
+    replace_option(options, 'maxiter', 'max_iter')
+    if 'print_level' not in options:
         options['print_level'] = 0
     if not 'tol' in options:
         options['tol'] = tol or 1e-8
@@ -125,7 +133,10 @@ def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=Non
         if hess is None and hessp is None:
             options['hessian_approximation'] = 'limited-memory'
     for option, value in options.items():
-        nlp.addOption(option, value)
+        try:
+            nlp.addOption(option, value)
+        except TypeError as e:
+            raise TypeError('Invalid option for IPOPT: {0}: {1} (Original message: "{2}")'.format(option, value, e))
 
     x, info = nlp.solve(_x0)
 
