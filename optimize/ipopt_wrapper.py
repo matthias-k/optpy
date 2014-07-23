@@ -69,7 +69,7 @@ def get_bounds(bounds):
         return lb, ub
 
 
-def get_constraint_bounds(constraints, x0):
+def get_constraint_bounds(constraints, x0, INF=1e19):
     if isinstance(constraints, dict):
         constraints = (constraints, )
     cl = []
@@ -82,7 +82,7 @@ def get_constraint_bounds(constraints, x0):
         if con['type'] == 'eq':
             cu.extend(np.zeros(m))
         elif con['type'] == 'ineq':
-            cu.extend(1e19*np.ones(m))
+            cu.extend(INF*np.ones(m))
         else:
             raise ValueError(con['type'])
     cl = np.array(cl)
