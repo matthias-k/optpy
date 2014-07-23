@@ -49,14 +49,14 @@ class IpoptProblemWrapper(object):
 
     def constraints(self, x):
         con_values = []
-        for fun, arg in zip(self._constraint_funs, self._constraint_args):
-            con_values.append(fun(x, *self.args))
+        for fun, args in zip(self._constraint_funs, self._constraint_args):
+            con_values.append(fun(x, *args))
         return np.hstack(con_values)
 
     def jacobian(self, x):
         con_values = []
-        for fun, arg in zip(self._constraint_jacs, self._constraint_args):
-            con_values.append(fun(x, *self.args))
+        for fun, args in zip(self._constraint_jacs, self._constraint_args):
+            con_values.append(fun(x, *args))
         return np.vstack(con_values)
 
 
