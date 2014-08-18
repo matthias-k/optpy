@@ -11,6 +11,7 @@ import numpy as np
 import scipy.optimize
 
 from .jacobian import FunctionWithApproxJacobian
+from .ipopt_wrapper import minimize_ipopt
 
 
 class ParameterManager(object):
@@ -135,7 +136,7 @@ def minimize(f, parameter_manager_or_x0, optimize=None, args=(), kwargs=None, me
                 param_values[param_name] = ret[i]
             return parameter_manager.build_vector(**param_values)
         fun_ = wrapped_f
-        jac_ = wrap_parameter_manager(jac_with_keyword, parameter_manager)
+        jac_ = wrap_parameter_manager(jac_with_keyword, parameter_manager, kwargs)
     elif bool(jac):
         def func_with_keyword(*args, **kwargs):
             kwargs['optimize'] = parameter_manager.optimize
@@ -174,13 +175,22 @@ def minimize(f, parameter_manager_or_x0, optimize=None, args=(), kwargs=None, me
         new_bounds = None
     if callback is not None:
         callback = wrap_parameter_manager(callback, parameter_manager)
-    res = scipy.optimize.minimize(fun_, x0, args=args, jac=jac_,
-                                  method=method,
-                                  constraints=new_constraints,
-                                  bounds=new_bounds,
-                                  tol=tol,
-                                  callback=callback,
-                                  options=options)
+    if method == 'IPOPT':
+        res = minimize_ipopt(fun_, x0, args=args, jac=jac_,
+                                      method=method,
+                                      constraints=new_constraints,
+                                      bounds=new_bounds,
+                                      tol=tol,
+                                      callback=callback,
+                                      options=options)
+    else:
+        res = scipy.optimize.minimize(fun_, x0, args=args, jac=jac_,
+                                      method=method,
+                                      constraints=new_constraints,
+                                      bounds=new_bounds,
+                                      tol=tol,
+                                      callback=callback,
+                                      options=options)
 
     params = parameter_manager.extract_parameters(res.x)
     for key in parameter_manager.parameters:
