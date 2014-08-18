@@ -13,18 +13,23 @@ from .jacobian import FunctionWithApproxJacobian
 
 
 class IpoptProblemWrapper(object):
-    def __init__(self, fun, args=(), jac=None, hess=None, hessp=None,
+    def __init__(self, fun, args=(), kwargs=None, jac=None, hess=None, hessp=None,
                  constraints=(), eps=1e-8):
+        self.fun_with_jac = None
+        self.last_x = None
         if hess is not None or hessp is not None:
             raise NotImplementedError('Using hessian matrixes is not yet implemented!')
         if jac is None:
             fun = FunctionWithApproxJacobian(fun, epsilon=eps, verbose=False)
             jac = fun.jac
+        elif jac is True:
+            self.fun_with_jac = fun
         elif not callable(jac):
-            raise NotImplementedError('For now, the jacobian has to be provided!')
+            raise NotImplementedError('jac has to be bool or a function')
         self.fun = fun
         self.jac = jac
         self.args = args
+        self.kwargs = kwargs or {}
         self._constraint_funs = []
         self._constraint_jacs = []
         self._constraint_args = []
@@ -40,12 +45,31 @@ class IpoptProblemWrapper(object):
             self._constraint_funs.append(con_fun)
             self._constraint_jacs.append(con_jac)
             self._constraint_args.append(con_args)
+        # Set up evaluation counts
+        self.nfev = 0
+        self.njev = 0
+        self.nit = 0
+
+    def evaluate_fun_with_grad(self, x):
+        if self.last_x is None or not np.all(self.last_x == x):
+            self.last_x = x
+            self.nfev += 1
+            self.last_value = self.fun(x, *self.args, **self.kwargs)
+        return self.last_value
 
     def objective(self, x):
-        return self.fun(x, *self.args)
+        if self.fun_with_jac:
+            return self.evaluate_fun_with_grad(x)[0]
 
-    def gradient(self, x):
-        return self.jac(x, *self.args)  # .T
+        self.nfev += 1
+        return self.fun(x, *self.args, **self.kwargs)
+
+    def gradient(self, x, **kwargs):
+        if self.fun_with_jac:
+            return self.evaluate_fun_with_grad(x)[1]
+
+        self.njev += 1
+        return self.jac(x, *self.args, **self.kwargs)  # .T
 
     def constraints(self, x):
         con_values = []
@@ -58,6 +82,23 @@ class IpoptProblemWrapper(object):
         for fun, args in zip(self._constraint_jacs, self._constraint_args):
             con_values.append(fun(x, *args))
         return np.vstack(con_values)
+
+    def intermediate(
+            self,
+            alg_mod,
+            iter_count,
+            obj_value,
+            inf_pr,
+            inf_du,
+            mu,
+            d_norm,
+            regularization_size,
+            alpha_du,
+            alpha_pr,
+            ls_trials
+            ):
+
+       self.nit = iter_count
 
 
 def get_bounds(bounds):
@@ -97,7 +138,7 @@ def replace_option(options, oldname, newname):
             options[newname] = options.pop(oldname)
 
 
-def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=None,
+def minimize_ipopt(fun, x0, args=(), kwargs=None, method=None, jac=None, hess=None, hessp=None,
                    bounds=None, constraints=(), tol=None, callback=None, options=None):
     """
     Minimize a function using ipopt. The call signature is exactly like for
@@ -110,7 +151,7 @@ def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=Non
     """
 
     _x0 = np.atleast_1d(x0)
-    problem = IpoptProblemWrapper(fun, args=args, jac=jac, hess=hess,
+    problem = IpoptProblemWrapper(fun, args=args, kwargs=kwargs, jac=jac, hess=hess,
                                   hessp=hessp, constraints=constraints)
     lb, ub = get_bounds(bounds)
 
@@ -156,4 +197,7 @@ def minimize_ipopt(fun, x0, args=(), method=None, jac=None, hess=None, hessp=Non
     return OptimizeResult(x=x, success=info['status'] == 0, status=info['status'],
                           message=info['status_msg'],
                           fun=info['obj_val'],
-                          info=info)
+                          info=info,
+                          nfev=problem.nfev,
+                          njev=problem.njev,
+                          nit=problem.nit)
