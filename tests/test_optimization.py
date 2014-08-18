@@ -76,6 +76,7 @@ class TestWrapParameterManager(unittest.TestCase):
 
 
 class TestMinimize(unittest.TestCase):
+    method='SLSQP'
     def test_simple(self):
         parameter_manager = optimization.ParameterManager(['x1', 'x2', 'x3'], ['x1', 'x2'],
                                                           x1=1.0, x2=np.array([2.0, 2.0]), x3=1.0)
@@ -83,7 +84,7 @@ class TestMinimize(unittest.TestCase):
         def f(x1, x2, x3):
             return np.sum(x1**2)+np.sum(x2**2)
 
-        res = optimization.minimize(f, parameter_manager, method='SLSQP')
+        res = optimization.minimize(f, parameter_manager, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -100,7 +101,7 @@ class TestMinimize(unittest.TestCase):
 
         constraints = [{'type': 'eq', 'fun': constraint}]
 
-        res = optimization.minimize(f, parameter_manager, method='SLSQP', constraints = constraints)
+        res = optimization.minimize(f, parameter_manager, method=self.method, constraints = constraints)
         np.testing.assert_allclose(res.x1, 1.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -117,7 +118,7 @@ class TestMinimize(unittest.TestCase):
 
         constraints = [{'type': 'ineq', 'fun': constraint}]
 
-        res = optimization.minimize(f, parameter_manager, method='SLSQP', constraints = constraints)
+        res = optimization.minimize(f, parameter_manager, method=self.method, constraints = constraints)
         np.testing.assert_allclose(res.x1, 0.0, atol=1e-8)
         np.testing.assert_allclose(res.x2, [0.5, 0.5])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -129,7 +130,7 @@ class TestMinimize(unittest.TestCase):
         def f(x1, x2, x3):
             return np.sum(x1**2)+np.sum(x2**2)
 
-        res = optimization.minimize(f, parameter_manager, method='SLSQP',
+        res = optimization.minimize(f, parameter_manager, method=self.method,
                                     bounds={'x1': [(0.5, 3.0)], 'x2': [(-2, 4), (-2, 10)]}, tol=1e-11)
         np.testing.assert_allclose(res.x1, 0.5)
         np.testing.assert_allclose(res.x2, [0.0, 0.0], atol=1e-8)
@@ -142,7 +143,7 @@ class TestMinimize(unittest.TestCase):
         def f(x1, x2, x3):
             return np.sum(x1**2)+np.sum(x2**2)
 
-        res = optimization.minimize(f, parameter_manager, method='SLSQP',
+        res = optimization.minimize(f, parameter_manager, method=self.method,
                                     bounds={'x2': [(-2, 4), (1, 10)]}, tol=1e-11)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 1.0], atol=1e-8)
@@ -156,7 +157,7 @@ class TestMinimize(unittest.TestCase):
             self.assertEqual(argument, 'argument')
             return np.sum(x1**2)+np.sum(x2**2)
 
-        res = optimization.minimize(f, parameter_manager, args= ('argument', ), method='SLSQP')
+        res = optimization.minimize(f, parameter_manager, args= ('argument', ), method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -170,7 +171,7 @@ class TestMinimize(unittest.TestCase):
             return np.sum(x1**2)+np.sum(x2**2)
 
         res = optimization.minimize(f, parameter_manager,
-                                    kwargs={'argument': 'argument'}, method='SLSQP')
+                                    kwargs={'argument': 'argument'}, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -192,7 +193,7 @@ class TestMinimize(unittest.TestCase):
                 ret.append(np.zeros_like(x3))
             return ret
 
-        res = optimization.minimize(f, parameter_manager, jac = fprime, method='SLSQP')
+        res = optimization.minimize(f, parameter_manager, jac = fprime, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -212,22 +213,23 @@ class TestMinimize(unittest.TestCase):
                 jacs.append(np.zeros_like(x3))
             return val, jacs
 
-        res = optimization.minimize(f, parameter_manager, jac = True, method='SLSQP')
+        res = optimization.minimize(f, parameter_manager, jac = True, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
 
 
 class TestMinimizeKeywordInterface(unittest.TestCase):
+    method='SLSQP'
     def test_simple(self):
         def f(x1, x2, x3):
             return np.sum(x1**2)+np.sum(x2**2)
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    method='SLSQP')
-        np.testing.assert_allclose(res.x1, 0.0)
-        np.testing.assert_allclose(res.x2, [0.0, 0.0])
-        np.testing.assert_allclose(res.x3, 1.0)
+                                    method=self.method)
+        np.testing.assert_allclose(res.x1, 0.0, atol=1e-8)
+        np.testing.assert_allclose(res.x2, [0.0, 0.0], atol=1e-8)
+        np.testing.assert_allclose(res.x3, 1.0, atol=1e-8)
 
     def test_with_equality_constraint(self):
         def f(x1, x2, x3):
@@ -239,9 +241,9 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
         constraints = [{'type': 'eq', 'fun': constraint}]
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    method='SLSQP', constraints = constraints)
+                                    method=self.method, constraints = constraints)
         np.testing.assert_allclose(res.x1, 1.0)
-        np.testing.assert_allclose(res.x2, [0.0, 0.0])
+        np.testing.assert_allclose(res.x2, [0.0, 0.0], atol=1e-8)
         np.testing.assert_allclose(res.x3, 1.0)
 
     def test_with_inequality_constraint(self):
@@ -254,7 +256,7 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
         constraints = [{'type': 'ineq', 'fun': constraint}]
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    method='SLSQP', constraints = constraints)
+                                    method=self.method, constraints = constraints)
         np.testing.assert_allclose(res.x1, 0.0, atol=1e-8)
         np.testing.assert_allclose(res.x2, [0.5, 0.5])
         np.testing.assert_allclose(res.x3, 1.0)
@@ -264,7 +266,7 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
             return np.sum(x1**2)+np.sum(x2**2)
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    method='SLSQP',
+                                    method=self.method,
                                     bounds={'x1': [(0.5, 3.0)], 'x2': [(-2, 4), (-2, 10)]}, tol=1e-11)
         np.testing.assert_allclose(res.x1, 0.5)
         np.testing.assert_allclose(res.x2, [0.0, 0.0], atol=1e-8)
@@ -275,7 +277,7 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
             return np.sum(x1**2)+np.sum(x2**2)
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    method='SLSQP',
+                                    method=self.method,
                                     bounds={'x2': [(-2, 4), (1, 10)]}, tol=1e-11)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 1.0], atol=1e-8)
@@ -288,7 +290,7 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                  args= ('argument', ), method='SLSQP')
+                                  args= ('argument', ), method=self.method)
         self.assertTrue(cm.exception.message.startswith('Keyword based'))
 
     def test_kwargs(self):
@@ -297,10 +299,10 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
             return np.sum(x1**2)+np.sum(x2**2)
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    kwargs={'argument': 'argument'}, method='SLSQP')
-        np.testing.assert_allclose(res.x1, 0.0)
-        np.testing.assert_allclose(res.x2, [0.0, 0.0])
-        np.testing.assert_allclose(res.x3, 1.0)
+                                    kwargs={'argument': 'argument'}, method=self.method)
+        np.testing.assert_allclose(res.x1, 0.0, atol=1e-8)
+        np.testing.assert_allclose(res.x2, [0.0, 0.0], atol=1e-8)
+        np.testing.assert_allclose(res.x3, 1.0, atol=1e-8)
 
     def test_separate_jacobian(self):
         def f(x1, x2, x3):
@@ -317,12 +319,13 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
             return ret
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    jac = fprime, method='SLSQP')
+                                    jac = fprime, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
 
     def test_combined_jacobian(self):
+        print self.method
         def f(x1, x2, x3, optimize=None):
             val = np.sum(x1**2)+np.sum(x2**2)
             jacs = []
@@ -335,10 +338,14 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
             return val, jacs
 
         res = optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
-                                    jac = True, method='SLSQP')
+                                    jac = True, method=self.method)
         np.testing.assert_allclose(res.x1, 0.0)
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
+
+
+class TestMinimizeKeywordInterfaceIpopt(TestMinimizeKeywordInterface):
+    method='IPOPT'
 
 if __name__ == '__main__':
     unittest.main()

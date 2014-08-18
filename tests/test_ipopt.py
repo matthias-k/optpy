@@ -21,6 +21,15 @@ class TestWrapper(unittest.TestCase):
         self.assertEqual(wrapper.objective(x), 0)
         np.testing.assert_allclose(wrapper.gradient(x), np.array([0, 0]))
 
+    def test_fun_combined_with_jac(self):
+        fun = lambda x: np.sum(np.square(x))
+        jac = lambda x: 2*x
+        fun_with_jac = lambda x: (fun(x), jac(x))
+        wrapper = ipopt.IpoptProblemWrapper(fun_with_jac, jac=True)
+        x = np.array([0, 0])
+        self.assertEqual(wrapper.objective(x), 0)
+        np.testing.assert_allclose(wrapper.gradient(x), np.array([0, 0]))
+
     def test_fun_with_constraint(self):
         fun = lambda x: x
         constraint = {'fun': lambda x: x-1,
