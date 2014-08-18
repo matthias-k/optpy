@@ -325,7 +325,6 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
         np.testing.assert_allclose(res.x3, 1.0)
 
     def test_combined_jacobian(self):
-        print self.method
         def f(x1, x2, x3, optimize=None):
             val = np.sum(x1**2)+np.sum(x2**2)
             jacs = []
