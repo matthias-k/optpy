@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import optimize.ipopt_wrapper as ipopt
+import optpy.ipopt_wrapper as ipopt
 
 
 class TestWrapper(unittest.TestCase):

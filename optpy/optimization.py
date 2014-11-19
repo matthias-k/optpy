@@ -145,7 +145,7 @@ def minimize(f, parameter_manager_or_x0, optimize=None, args=(), kwargs=None, me
             for i, param_name in enumerate(parameter_manager.optimize):
                 param_values[param_name] = jacs[i]
             return func_value, parameter_manager.build_vector(**param_values)
-        fun_ = wrap_parameter_manager(func_with_keyword, parameter_manager)
+        fun_ = wrap_parameter_manager(func_with_keyword, parameter_manager, kwargs)
         jac_ = True
     else:
         fun = jac_approx(wrapped_f, 1e-8)

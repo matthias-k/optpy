@@ -5,7 +5,7 @@ import sys, os
 
 version = '0.0.1'
 
-setup(name='optimize',
+setup(name='optpy',
       version=version,
       description="Library for flexible optimization, can use scipy's minimze and ipopt",
       long_description=""" """,
@@ -16,7 +16,7 @@ setup(name='optimize',
       author='Matthias Kümmerer',
       author_email='matthias@matthias-k.org',
       url='',
-      packages = ['optimize'],
+      packages = ['optpy'],
       #packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
 #      package_data={'':'LICENSE'},
       include_package_data=True,

@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from optimize import optimization
+from optpy import optimization
 
 
 class TestFunctionWithApproxJacobian(unittest.TestCase):
