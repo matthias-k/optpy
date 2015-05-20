@@ -8,7 +8,12 @@ except ImportError:
     from scipy.optimize import Result
     OptimizeResult = Result
 
-import ipopt
+try:
+    import ipopt
+except ImportError:
+    import warnings
+    warnings.warn('Could not import ipopt. Probably cyipopt is not installed')
+
 from .jacobian import FunctionWithApproxJacobian
 
 
