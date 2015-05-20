@@ -34,7 +34,7 @@ class ParameterManager(object):
         params = self.param_values.copy()
         index = 0
         for param_name in self.optimize:
-            if not isinstance(self.param_values[param_name], np.ndarray):
+            if not isinstance(self.param_values[param_name], np.ndarray) or len(self.param_values[param_name].shape) == 0:
                 # Only scalar value
                 params[param_name] = x[index]
                 index += 1

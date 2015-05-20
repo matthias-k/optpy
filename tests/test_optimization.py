@@ -30,6 +30,21 @@ class TestParameterManager(unittest.TestCase):
         np.testing.assert_allclose(params['x2'], [6.0, 7.0])
         np.testing.assert_allclose(params['x3'], 4.0)
 
+    def test_build_vector_0d_array(self):
+        parameter_manager = optimization.ParameterManager(['x1', 'x2', 'x3'], ['x1', 'x2'],
+                                                          x1=np.array(1.0), x2=np.array([2.0, 3.0]), x3=4.0)
+        np.testing.assert_allclose(parameter_manager.build_vector(), [1.0, 2.0, 3.0])
+        np.testing.assert_allclose(parameter_manager.build_vector(x1=4), [4.0, 2.0, 3.0])
+
+    def test_extract_parameters_0d_array(self):
+        parameter_manager = optimization.ParameterManager(['x1', 'x2', 'x3'], ['x1', 'x2'],
+                                                          x1=np.array(1.0), x2=np.array([2.0, 3.0]), x3=4.0)
+        x = np.array([5.0, 6.0, 7.0])
+        params = parameter_manager.extract_parameters(x)
+        np.testing.assert_allclose(params['x1'], 5.0)
+        np.testing.assert_allclose(params['x2'], [6.0, 7.0])
+        np.testing.assert_allclose(params['x3'], 4.0)
+
 
 class TestKeywordParameterManager(unittest.TestCase):
     def test_build_vector(self):
@@ -42,6 +57,25 @@ class TestKeywordParameterManager(unittest.TestCase):
 
     def test_extract_parameters(self):
         parameter_manager = optimization.KeywordParameterManager({'x1': 1.0,
+                                                                  'x2': np.array([2.0, 3.0]),
+                                                                  'x3': 4.0},
+                                                                 ['x1', 'x2'])
+        x = np.array([5.0, 6.0, 7.0])
+        params = parameter_manager.extract_parameters(x)
+        np.testing.assert_allclose(params['x1'], 5.0)
+        np.testing.assert_allclose(params['x2'], [6.0, 7.0])
+        np.testing.assert_allclose(params['x3'], 4.0)
+
+    def test_build_vector_0d_array(self):
+        parameter_manager = optimization.KeywordParameterManager({'x1': np.array(1.0),
+                                                                  'x2': np.array([2.0, 3.0]),
+                                                                  'x3': 4.0},
+                                                                 ['x1', 'x2'])
+        np.testing.assert_allclose(parameter_manager.build_vector(), [1.0, 2.0, 3.0])
+        np.testing.assert_allclose(parameter_manager.build_vector(x1=4), [4.0, 2.0, 3.0])
+
+    def test_extract_parameters_0d_array(self):
+        parameter_manager = optimization.KeywordParameterManager({'x1': np.array(1.0),
                                                                   'x2': np.array([2.0, 3.0]),
                                                                   'x3': 4.0},
                                                                  ['x1', 'x2'])
