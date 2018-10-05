@@ -26,5 +26,5 @@ script:
   # Make sure the library installs.
   - python setup.py install
   - python setup.py build_ext --inplace
-  - python -c "optpy"
+  - python -c "import optpy"
   - nosetest tests
