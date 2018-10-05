@@ -325,7 +325,7 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             optimization.minimize(f, {'x1': 1.0, 'x2': np.array([2.0, 2.0]), 'x3': 1.0}, optimize=['x1', 'x2'],
                                   args= ('argument', ), method=self.method)
-        self.assertTrue(cm.exception.message.startswith('Keyword based'))
+        self.assertTrue(cm.exception.args[0].startswith('Keyword based'))
 
     def test_kwargs(self):
         def f(x1, x2, x3, argument):
@@ -376,9 +376,6 @@ class TestMinimizeKeywordInterface(unittest.TestCase):
         np.testing.assert_allclose(res.x2, [0.0, 0.0])
         np.testing.assert_allclose(res.x3, 1.0)
 
-
-class TestMinimizeKeywordInterfaceIpopt(TestMinimizeKeywordInterface):
-    method='IPOPT'
 
 if __name__ == '__main__':
     unittest.main()

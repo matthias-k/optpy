@@ -5,13 +5,12 @@ Some wrappers around scipy.optimize.minimize to make optimization
 of functions with multiple parameters easier
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function, unicode_literals, division
 
 import numpy as np
 import scipy.optimize
 
 from .jacobian import FunctionWithApproxJacobian
-from .ipopt_wrapper import minimize_ipopt
 
 
 class ParameterManager(object):
@@ -175,22 +174,14 @@ def minimize(f, parameter_manager_or_x0, optimize=None, args=(), kwargs=None, me
         new_bounds = None
     if callback is not None:
         callback = wrap_parameter_manager(callback, parameter_manager)
-    if method == 'IPOPT':
-        res = minimize_ipopt(fun_, x0, args=args, jac=jac_,
-                                      method=method,
-                                      constraints=new_constraints,
-                                      bounds=new_bounds,
-                                      tol=tol,
-                                      callback=callback,
-                                      options=options)
-    else:
-        res = scipy.optimize.minimize(fun_, x0, args=args, jac=jac_,
-                                      method=method,
-                                      constraints=new_constraints,
-                                      bounds=new_bounds,
-                                      tol=tol,
-                                      callback=callback,
-                                      options=options)
+
+    res = scipy.optimize.minimize(fun_, x0, args=args, jac=jac_,
+                                  method=method,
+                                  constraints=new_constraints,
+                                  bounds=new_bounds,
+                                  tol=tol,
+                                  callback=callback,
+                                  options=options)
 
     params = parameter_manager.extract_parameters(res.x)
     for key in parameter_manager.parameters:
@@ -206,5 +197,5 @@ if __name__ == '__main__':
     #print
     #print val
     g = testFun.jac(x0)
-    print
-    print g
+    print()
+    print(g)

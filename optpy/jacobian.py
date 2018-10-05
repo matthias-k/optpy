@@ -2,6 +2,7 @@
 Author: Matthias Kuemmerer, 2014
 
 """
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
 import numpy as np
@@ -20,13 +21,13 @@ class FunctionWithApproxJacobian(object):
             self.log('.')
             value = self._func(x, *args, **kwargs)
             if np.any(np.isnan(value)):
-                print "Warning! nan function value encountered at {0}".format(x)
+                print("Warning! nan function value encountered at {0}".format(x))
             self.value_cache[key] = value
         return self.value_cache[key]
 
     def func(self, x, *args, **kwargs):
         if self.verbose:
-            print x
+            print(x)
         return self(x, *args, **kwargs)
 
     def log(self, msg):

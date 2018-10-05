@@ -2,34 +2,19 @@ optpy
 ========
 
 This library provides some functions to make optimization in python easier.
-It can use `scipy.optimize` and `ipopt` as minimizers. Also, it provides
+It can use `scipy.optimize`. Also, it provides
 an interface that makes minimizing functions of multiple variables easier,
 especially if only a subset of the variables should be considered for the
 optimization.
 
-ipopt
------
-
-[https://projects.coin-or.org/Ipopt](ipopt) is an interior point optpyr. This library
-provides a wrapper `minimize_ipopt` that can be used exactly as `scipy.optimize.mimize`.
-In fact, in can even be provides as `method` argument to `scipy.optimize.minize`.
-
-```python
-
-from optpy import minimize_ipopt
-
-fun = lambda x: np.sum(np.square(x))
-constraints = [{'fun': lambda x: x[0]-1,
-                'type': 'ineq'},
-               {'fun': lambda x: x[1]-2,
-                'type': 'ineq'}]
-
-res = ipopt.minimize_ipopt(fun, [1000, 10], constraints=constraints, tol=1e-9, options={'disp': 0})
-print res
-```
+This package used to contain a convenience function `minimize_ipopt` that
+mimicked the `scipy.mimize.optimize` interface. This function is now part of
+[https://github.com/matthias-k/cyipopt](cyipopt). If you want to use optpy
+with ipopt just set the `method` argument to the minimize function from
+cyipopt.
 
 
-optimization of multiple variables
+Optimization of multiple variables
 ----------------------------------
 
 In practise, often one has to optimize functions that depend on multiple variables. Most
